@@ -21,7 +21,7 @@ class Dynamics:
         self.g = 9.81               # m/s^2, gravity
 
         # Engine/nozzle geometry
-        self.l_arm = 4.0            # m, nozzle moment arm from CG
+        self.l_arm = 6.0            # m, nozzle moment arm from CG
 
         # Atmospheric model (ISA)
         self.rho_sl = 1.225         # kg/m^3, sea level density
@@ -35,7 +35,7 @@ class Dynamics:
         self.CL_alpha = 5.5         # per radian, lift curve slope
         self.CD_0 = 0.025           # zero-lift drag coefficient
         self.CD_alpha = 0.3         # drag due to alpha squared
-        self.CM_alpha = -0.8        # pitch moment curve slope (static margin)
+        self.CM_alpha = -0.4        # pitch moment curve slope (static margin)
         self.CM_q = -15.0           # pitch damping coefficient
 
     def atmosphere(self, altitude):
