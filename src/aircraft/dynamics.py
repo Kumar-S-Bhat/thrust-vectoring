@@ -1,4 +1,5 @@
 import numpy as np
+from src.aircraft.Aerodynamics import AeroTable
 
 
 class Dynamics:
@@ -31,12 +32,10 @@ class Dynamics:
         # Propulsion
         self.thrust_sl = 130000.0   # N, sea level static thrust
 
-        # Simplified aerodynamic coefficients (will use tables later)
-        self.CL_alpha = 5.5         # per radian, lift curve slope
-        self.CD_0 = 0.025           # zero-lift drag coefficient
-        self.CD_alpha = 0.3         # drag due to alpha squared
-        self.CM_alpha = -0.4        # pitch moment curve slope (static margin)
         self.CM_q = -15.0           # pitch damping coefficient
+
+        # Initialize AeroTable Object
+        self.aero = AeroTable('src/data/aero_tables.csv')
 
     def atmosphere(self, altitude):
         """
@@ -111,9 +110,9 @@ class Dynamics:
         T = self.thrust_force(h, throttle)
 
         # Aerodynamic coefficients
-        CL = self.CL_alpha * alpha
-        CD = self.CD_0 + self.CD_alpha * alpha**2
-        CM = self.CM_alpha * alpha + self.CM_q * (q * self.chord) / (2 * V)
+        CL, CD, CM_static = self.aero.get_coefficients(alpha)
+
+        CM = CM_static + self.CM_q * (q * self.chord) / (2 * V)
 
         # Aerodynamic forces and moments (body frame)
         Fx_aero = -q_infty * self.S * CD  # Drag (opposes motion)
