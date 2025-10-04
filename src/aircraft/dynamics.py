@@ -1,5 +1,7 @@
 import numpy as np
 from src.aircraft.Aerodynamics import AeroTable
+from src.propulsion.thrust_model import ThrustModel
+from src.propulsion.nozzle import ThrustVectoringSystem
 
 
 class Dynamics:
@@ -13,65 +15,26 @@ class Dynamics:
     - x, z: position in NED frame (m)
     """
 
-    def __init__(self):
+    def __init__(self, use_actuator_dynamics=True):
         # Aircraft parameters (F-16 class)
-        self.m = 9300.0              # kg, mass
-        self.Iy = 55814.0           # kg*m^2, pitch moment of inertia
-        self.S = 27.87              # m^2, wing reference area
-        self.chord = 3.45           # m, mean aerodynamic chord
-        self.g = 9.81               # m/s^2, gravity
+        self.m = 9300.0              # mass
+        self.Iy = 55814.0           # pitch moment of inertia
+        self.S = 27.87              # wing reference area
+        self.chord = 3.45           # mean aerodynamic chord
+        self.g = 9.81
+        self.l_arm = 6.0            # nozzle moment arm from CG
 
-        # Engine/nozzle geometry
-        self.l_arm = 6.0            # m, nozzle moment arm from CG
+        # Store flag
+        self.use_actuator_dynamics = use_actuator_dynamics
 
-        # Atmospheric model (ISA)
-        self.rho_sl = 1.225         # kg/m^3, sea level density
-        self.Temp_sl = 288.15       # K, sea level temperature
-        self.L = 0.0065             # K/m, temperature lapse rate
-
-        # Propulsion
-        self.thrust_sl = 130000.0   # N, sea level static thrust
+        # Initialize subsystems
+        self.aero = AeroTable('src/data/aero_tables.csv')
+        self.engine = ThrustModel(thrust_sl=130000.0, rho_sl=1.225)
+        self.tvc = ThrustVectoringSystem(l_arm=self.l_arm)
 
         self.CM_q = -15.0           # pitch damping coefficient
 
-        # Initialize AeroTable Object
-        self.aero = AeroTable('src/data/aero_tables.csv')
-
-    def atmosphere(self, altitude):
-        """
-        ISA atmosphere model
-
-        Args:
-            altitude (float): Altitude in meters (positive up)
-
-        Returns:
-            float: Air density (kg/m^3)
-        """
-        if altitude < 11000:
-            Temp = self.Temp_sl - self.L * altitude
-        else:
-            Temp = 216.65  # Stratosphere constant temperature
-
-        rho = self.rho_sl * (Temp / self.Temp_sl)**4.256
-        return rho
-
-    def thrust_force(self, altitude, throttle):
-        """
-        Simple static thrust model with altitude correction
-
-        Args:
-            altitude (float): Altitude (m)
-            throttle (float): Throttle setting (0-1)
-
-        Returns:
-            float: Thrust force (N)
-        """
-        rho = self.atmosphere(altitude)
-        sigma = rho / self.rho_sl  # Density ratio
-        T = self.thrust_sl * sigma * throttle
-        return T
-
-    def dynamics(self, state, controls=None):
+    def dynamics(self, state, controls=None, dt=0.01):
         """
         Longitudinal aircraft dynamics equations
 
@@ -89,10 +52,10 @@ class Dynamics:
         # Handle controls with defaults
         if controls is None:
             throttle = 0.5
-            delta_p = 0.0  # nozzle pitch angle
+            delta_p_cmd = 0.0  # nozzle pitch angle
         else:
             throttle = controls.get('throttle', 0.5)
-            delta_p = controls.get('delta_p', 0.0)
+            delta_p_cmd = controls.get('delta_p', 0.0)
 
         # Current altitude (positive up, z is negative in NED)
         h = -z
@@ -103,15 +66,14 @@ class Dynamics:
             V = 1e-6
 
         alpha = np.arctan2(w, u)  # Angle of attack
-        rho = self.atmosphere(h)
+        rho = self.engine.atmosphere(h)
         q_infty = 0.5 * rho * V**2  # Dynamic pressure
 
         # Get thrust
-        T = self.thrust_force(h, throttle)
+        T = self.engine.thrust_force(h, throttle)
 
         # Aerodynamic coefficients
         CL, CD, CM_static = self.aero.get_coefficients(alpha)
-
         CM = CM_static + self.CM_q * (q * self.chord) / (2 * V)
 
         # Aerodynamic forces and moments (body frame)
@@ -119,10 +81,18 @@ class Dynamics:
         Fz_aero = -q_infty * self.S * CL  # Lift (negative in body z)
         M_aero = q_infty * self.S * self.chord * CM  # Pitch moment
 
-        # Thrust vectoring forces and moments (body frame)
-        Fx_thrust = T * np.cos(delta_p)  # Forward thrust component
-        Fz_thrust = T * np.sin(delta_p)  # Vertical thrust component
-        M_thrust = T * np.sin(delta_p) * self.l_arm  # Pitch moment from TVC
+        # Get thrust vectoring forces/moments
+        if self.use_actuator_dynamics:
+            tvc_output = self.tvc.update(T, delta_p_cmd, dt)
+            Fx_thrust = tvc_output['Fx']
+            Fz_thrust = tvc_output['Fz']
+            M_thrust = tvc_output['M']
+        else:
+            # Instant response for trim calculations
+            forces = self.tvc.calculate_force(T, delta_p_cmd)
+            Fx_thrust = forces['Fx']
+            Fz_thrust = forces['Fz']
+            M_thrust = forces['M']
 
         # Total forces and moments
         Fx_total = Fx_aero + Fx_thrust

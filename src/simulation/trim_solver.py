@@ -5,7 +5,7 @@ from scipy.optimize import least_squares
 
 class Trim_solver():
     def __init__(self):
-        self.aircraft = Dynamics()
+        self.aircraft = Dynamics(use_actuator_dynamics=False)
 
     def trim_cost_function(self, control_vars, target_conditions):
         """function to be optimized
