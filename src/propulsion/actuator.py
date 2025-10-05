@@ -79,10 +79,6 @@ class NozzleActuator:
         """Get current nozzle position (rad)."""
         return self.delta_p
 
-    def get_position_deg(self):
-        """Get current nozzle position (degrees)."""
-        return np.degrees(self.delta_p)
-
     def at_limit(self):
         """
         Check if actuator is at position limit.
