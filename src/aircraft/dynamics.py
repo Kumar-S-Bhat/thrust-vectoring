@@ -86,13 +86,13 @@ class Dynamics:
             tvc_output = self.tvc.update(T, delta_p_cmd, dt)
             Fx_thrust = tvc_output['Fx']
             Fz_thrust = tvc_output['Fz']
-            M_thrust = tvc_output['M']
+            M_thrust = tvc_output['My']
         else:
             # Instant response for trim calculations
-            forces = self.tvc.calculate_force(T, delta_p_cmd)
+            forces = self.tvc.calculate_forces_moments(T, delta_p_cmd)
             Fx_thrust = forces['Fx']
             Fz_thrust = forces['Fz']
-            M_thrust = forces['M']
+            M_thrust = forces['My']
 
         # Total forces and moments
         Fx_total = Fx_aero + Fx_thrust
