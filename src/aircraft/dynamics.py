@@ -1,5 +1,5 @@
 import numpy as np
-from src.aircraft.Aerodynamics import AeroTable
+from src.aircraft.aerodynamics import AeroTable
 from src.propulsion.thrust_model import ThrustModel
 from src.propulsion.nozzle import ThrustVectoringSystem
 
@@ -40,8 +40,8 @@ class Dynamics:
 
         Args:
             state (array): [u, w, q, theta, x, z]
-            controls (dict): {'throttle': 0-1, 'delta_p': rad} 
-                           If None, uses throttle=0.5, delta_p=0
+            controls (dict): {'throttle': 0-1, 'delta_p': rad, 'delta_e': rad} 
+                           If None, uses throttle=0.5, delta_p=0, delta_e=0.0
 
         Returns:
             array: State derivatives [u_dot, w_dot, q_dot, theta_dot, x_dot, z_dot]
@@ -52,10 +52,12 @@ class Dynamics:
         # Handle controls with defaults
         if controls is None:
             throttle = 0.5
-            delta_p_cmd = 0.0  # nozzle pitch angle
+            delta_p_cmd = 0.0  # nozzle pitch
+            delta_e = 0.0
         else:
             throttle = controls.get('throttle', 0.5)
             delta_p_cmd = controls.get('delta_p', 0.0)
+            delta_e = controls.get('delta_e')
 
         # Current altitude (positive up, z is negative in NED)
         h = -z
@@ -73,8 +75,9 @@ class Dynamics:
         T = self.engine.thrust_force(h, throttle)
 
         # Aerodynamic coefficients
-        CL, CD, CM_static = self.aero.get_coefficients(alpha)
-        CM = CM_static + self.CM_q * (q * self.chord) / (2 * V)
+        CL, CD, CM_static, Cm_de = self.aero.get_coefficients(alpha)
+        CM = CM_static + self.CM_q * \
+            (q * self.chord) / (2 * V) + Cm_de * delta_e
 
         # Aerodynamic forces and moments (body frame)
         Fx_aero = -q_infty * self.S * CD  # Drag (opposes motion)

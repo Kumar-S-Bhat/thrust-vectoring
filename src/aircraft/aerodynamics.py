@@ -14,6 +14,7 @@ class AeroTable:
         self.CL_interp = None
         self.CD_interp = None
         self.Cm_interp = None
+        self.Cm_de_interp = None
 
         self.alpha_min_rad = 0.0
         self.alpha_max_rad = 0.0
@@ -37,7 +38,7 @@ class AeroTable:
         self.alpha_min_rad = alpha_radian[0]
         self.alpha_max_rad = alpha_radian[-1]
 
-        for coeff_name in ['CL', 'CD', 'Cm']:
+        for coeff_name in ['CL', 'CD', 'Cm', 'Cm_de']:
             interp = CubicSpline(alpha_radian, df_sorted[coeff_name].values)
             setattr(self, f'{coeff_name}_interp', interp)
 
@@ -50,7 +51,7 @@ class AeroTable:
             beta (float): Sideslip angle (RADIAN) - Currently ignored (1D)
 
         Returns:
-            list: [CL, CD, Cm]
+            list: [CL, CD, Cm, Cm_de]
         """
 
         if self.CL_interp is None:
@@ -67,5 +68,6 @@ class AeroTable:
         CL = float(self.CL_interp(alpha))
         CD = float(self.CD_interp(alpha))
         Cm = float(self.Cm_interp(alpha))
+        Cm_de = float(self.Cm_de_interp(alpha))
 
-        return [CL, CD, Cm]
+        return [CL, CD, Cm, Cm_de]

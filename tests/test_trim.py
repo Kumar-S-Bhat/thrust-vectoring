@@ -16,6 +16,7 @@ for V, gamma, h in test_cases:
         print(f"✓ V={V} γ={np.degrees(gamma):.1f}° h={h}m: "
               f"throttle={result['throttle']:.2f}, "
               f"δp={np.degrees(result['delta_p']):.1f}°, "
+              f"δe={np.degrees(result['delta_e']):.1f}°, "
               f"α={np.degrees(result['alpha']):.1f}°")
     else:
         print(f"✗ V={V} γ={np.degrees(gamma):.1f}° h={h}m: FAILED")

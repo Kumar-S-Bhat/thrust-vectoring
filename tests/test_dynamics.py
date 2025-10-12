@@ -10,7 +10,7 @@ aircraft[1] = Dynamics(use_actuator_dynamics=False)
 state = [100.0, 5.0, 0.0, 0.05, 0.0, -1000.0]  # u, w, q, theta, x, z
 
 # Controls
-controls = {'throttle': 0.7, 'delta_p': 0.1}
+controls = {'throttle': 0.7, 'delta_p': 0.1, 'delta_e': 0.2}
 
 # Calculate derivatives
 for i in range(2):
