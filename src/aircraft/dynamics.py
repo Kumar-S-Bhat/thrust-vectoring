@@ -77,7 +77,7 @@ class Dynamics:
         # Aerodynamic coefficients
         CL, CD, CM_static, Cm_de = self.aero.get_coefficients(alpha)
         CM = CM_static + self.CM_q * \
-            (q * self.chord) / (2 * V) + Cm_de * delta_e
+            (q * self.chord) / (2 * V) - Cm_de * delta_e
 
         # Aerodynamic forces and moments (body frame)
         Fx_aero = -q_infty * self.S * CD  # Drag (opposes motion)
@@ -110,6 +110,10 @@ class Dynamics:
 
         # Moment equation
         q_dot = M_total / self.Iy
+
+        # === HARD-CLAMP PITCH ACCELERATION ===
+        MAX_PITCH_ACCEL_RAD = np.radians(5000)
+        q_dot = np.clip(q_dot, -MAX_PITCH_ACCEL_RAD, MAX_PITCH_ACCEL_RAD)
 
         # Attitude kinematics
         theta_dot = q  # For longitudinal motion

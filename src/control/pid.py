@@ -87,9 +87,9 @@ class PID:
 
 
 class CascadePID:
-    def __init__(self, outer_pid, inner_pid):
+    def __init__(self, outer_pid, inner_scheduled_pid):
         self.outer = outer_pid
-        self.inner = inner_pid
+        self.inner = inner_scheduled_pid
 
     def reset(self):
         """Reset both controllers."""
@@ -103,6 +103,6 @@ class CascadePID:
 
         # Inner loop produces final control output
         control_output = self.inner.update(
-            inner_setpoint, inner_measurement, dt)
+            inner_setpoint, inner_measurement, outer_measurement, dt)
 
         return control_output
