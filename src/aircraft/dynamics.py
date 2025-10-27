@@ -28,7 +28,7 @@ class Dynamics:
         self.use_actuator_dynamics = use_actuator_dynamics
 
         # Initialize subsystems
-        self.aero = AeroTable('src/data/aero_tables.csv')
+        self.aero = AeroTable('data/aero_tables.csv')
         self.engine = ThrustModel(thrust_sl=130000.0, rho_sl=1.225)
         self.tvc = ThrustVectoringSystem(l_arm=self.l_arm)
 

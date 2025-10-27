@@ -26,7 +26,7 @@ class ControlAllocator:
         self.elevator_limits = (-np.radians(25), np.radians(25))
         self.nozzle_limits = (-np.radians(20), np.radians(20))
 
-        self.aero = AeroTable('src/data/aero_tables.csv')
+        self.aero = AeroTable('data/aero_tables.csv')
 
     def allocate_simple(self, desired_moment):
         """
