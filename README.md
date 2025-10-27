@@ -55,7 +55,7 @@ python examples/q_tracking.py
 
 ## 📂 Project Structure
 ```
-thrust-vectoring-control/
+thrust-vectoring/
 ├── src/
 │   ├── aircraft/
 │   │   ├── dynamics.py          # 6DOF longitudinal equations
@@ -63,22 +63,32 @@ thrust-vectoring-control/
 │   │   └── frames.py            # Coordinate transformations
 │   ├── propulsion/
 │   │   ├── thrust_model.py      # Engine thrust model
-│   │   ├── nozzle.py           # TVC system
-│   │   └── actuator.py         # Nozzle actuator dynamics
+│   │   ├── nozzle.py            # TVC system
+│   │   └── actuator.py          # Nozzle actuator dynamics
 │   ├── control/
-│   │   ├── pid.py              # PID controller with anti-windup
-│   │   ├── gain_scheduled.py   # Gain-scheduled PID
-│   │   ├── allocator.py        # Control allocation
-│   │   └── pitch_controller.py # Longitudinal controller
+│   │   ├── pid.py               # PID controller with anti-windup
+│   │   ├── gain_scheduled.py    # Gain-scheduled PID
+│   │   ├── allocator.py         # Control allocation
+│   │   └── pitch_controller.py  # Longitudinal controller
 │   └── simulation/
-│       └── trim_solver.py      # Trim condition solver
+│       └── trim_solver.py       # Trim condition solver
 ├── examples/
-│   └── q_tracking.py           # Main demonstration
-├── data/
-│   └── aero_tables.csv         # Aerodynamic data
+│   ├── q_tracking.py            # Pitch rate tracking demo
+│   ├── nozzle_step.py           # Actuator response test
+│   ├── simulate_flight.py       # Open-loop flight simulation
+│   └── tune_pid_nozzle.py       # PID gain tuning
 ├── tests/
-│   └── test_dynamics.py        # Unit tests
+│   ├── test_actuator_response.py
+│   ├── test_dynamics.py
+│   ├── test_pid_response.py
+│   ├── test_thrust_model.py
+│   └── test_trim.py
+├── data/
+│   └── aero_tables.csv          # Aerodynamic coefficient data
+├── q_tracking_comparison.png     # Results visualization
 ├── requirements.txt
+├── LICENSE
+├── .gitignore
 └── README.md
 ```
 
