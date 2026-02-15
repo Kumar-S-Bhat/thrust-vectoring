@@ -197,8 +197,8 @@ This project demonstrates:
 Aerospace Engineering Student  
 Indian Institute of Engineering Science and Technology, Shibpur
 
-**LinkedIn:** https://www.linkedin.com/in/kumar-bhat-6337a7332/  
-**GitHub:** https://github.com/Kumar-S-Bhat
+**LinkedIn:** [linkedin.com/in/kumar-bhat](https://www.linkedin.com/in/kumar-bhat/)  
+**GitHub:** [github.com/Kumar-S-Bhat](https://github.com/Kumar-S-Bhat)
 
 ## 📄 License
 
